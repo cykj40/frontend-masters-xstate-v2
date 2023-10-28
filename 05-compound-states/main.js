@@ -23,9 +23,9 @@ const playerMachine = createMachine({
       on: {
         LOADED: {
           actions: 'assignSongData',
-          // Make this go to a 'ready' state instead
-          target: 'paused',
+          target: 'playing',
         },
+      }
       },
     },
     // Refactor the 'paused' and 'playing' states so that
@@ -112,19 +112,19 @@ const playerMachine = createMachine({
 const service = interpret(playerMachine).start();
 window.service = service;
 
-elements.elPlayButton.addEventListener('click', () => {
+elements.document.elPlayButton.addEventListener('click', () => {
   service.send({ type: 'PLAY' });
 });
-elements.elPauseButton.addEventListener('click', () => {
+elements.document.elPauseButton.addEventListener('click', () => {
   service.send({ type: 'PAUSE' });
 });
-elements.elSkipButton.addEventListener('click', () => {
+elements.document.elSkipButton.addEventListener('click', () => {
   service.send({ type: 'SKIP' });
 });
-elements.elLikeButton.addEventListener('click', () => {
+elements.document.elLikeButton.addEventListener('click', () => {
   service.send({ type: 'LIKE' });
 });
-elements.elDislikeButton.addEventListener('click', () => {
+elements.document.elDislikeButton.addEventListener('click', () => {
   service.send({ type: 'DISLIKE' });
 });
 
@@ -132,10 +132,10 @@ service.subscribe((state) => {
   console.log(state.value, state.context);
   const { context } = state;
 
-  elements.elLoadingButton.hidden = !state.hasTag('loading');
-  elements.elPlayButton.hidden = !state.can({ type: 'PLAY' });
-  elements.elPauseButton.hidden = !state.can({ type: 'PAUSE' });
-  elements.elVolumeButton.dataset.level =
+  elements.document.elLoadingButton.hidden = !state.hasTag('loading');
+  elements.document.elPlayButton.hidden = !state.can({ type: 'PLAY' });
+  elements.document.elPauseButton.hidden = !state.can({ type: 'PAUSE' });
+  elements.document.elVolumeButton.dataset.level =
     context.volume === 0
       ? 'zero'
       : context.volume <= 2
@@ -144,15 +144,15 @@ service.subscribe((state) => {
       ? 'high'
       : undefined;
 
-  elements.elScrubberInput.setAttribute('max', context.duration);
-  elements.elScrubberInput.value = context.elapsed;
-  elements.elElapsedOutput.innerHTML = formatTime(
+  elements.document.elScrubberInput.setAttribute('max', context.duration);
+  elements.document.elScrubberInput.value = context.elapsed;
+  elements.document.elElapsedOutput.innerHTML = formatTime(
     context.elapsed - context.duration
   );
 
-  elements.elLikeButton.dataset.likeStatus = context.likeStatus;
-  elements.elArtist.innerHTML = context.artist;
-  elements.elTitle.innerHTML = context.title;
+  elements.document.elLikeButton.dataset.likeStatus = context.likeStatus;
+  elements.document.elArtist.innerHTML = context.artist;
+  elements.document.elTitle.innerHTML = context.title;
 });
 
 service.send({

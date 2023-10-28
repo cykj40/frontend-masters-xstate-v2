@@ -38,6 +38,12 @@ const playerMachine = createMachine({
       },
       // Add an eventless transition here that always goes to 'paused'
       // when `elapsed` value is >= the `duration` value
+
+      always: [
+        { cond: (ctx) => ctx.elapsed >= ctx.duration, target: 'paused' },
+      ],
+
+      
     },
   },
   on: {
@@ -58,11 +64,22 @@ const playerMachine = createMachine({
       // Add two possible transitions here:
       // One that raises UNLIKE if the `likeStatus` is 'liked',
       // and one that raises LIKE if it's 'unliked'.
+      // no more comments next line better be code
+      { cond: (ctx) => ctx.likeStatus === 'liked', actions: 'unlikeSong' },
+      { cond: (ctx) => ctx.likeStatus === 'unliked', actions: 'likeSong' },
+
+
+
     ],
     VOLUME: {
       // Make sure the volume can only be assigned if the level is
       // within range (between 0 and 10)
+      cond: (contex, event) =>  event.level >= 0 && event.level <= 10,
+
       actions: 'assignVolume',
+
+      
+
     },
     'AUDIO.TIME': {
       actions: 'assignTime',
@@ -100,6 +117,8 @@ const playerMachine = createMachine({
   },
   guards: {
     // Add the guard implementations here, if you'd like
+
+
   },
 });
 
@@ -138,13 +157,13 @@ service.subscribe((state) => {
       ? 'high'
       : undefined;
 
-  elements.elScrubberInput.setAttribute('max', context.duration);
-  elements.elScrubberInput.value = context.elapsed;
-  elements.elElapsedOutput.innerHTML = formatTime(
+  elements.document.elScrubberInput.setAttribute('max', context.duration);
+  elements.document.elScrubberInput.value = context.elapsed;
+  elements.document.elElapsedOutput.innerHTML = formatTime(
     context.elapsed - context.duration
   );
 
-  elements.elLikeButton.dataset.likeStatus = context.likeStatus;
+  elements.document.elLikeButton.dataset.likeStatus = context.likeStatus;
   elements.elArtist.innerHTML = context.artist;
   elements.elTitle.innerHTML = context.title;
 });
