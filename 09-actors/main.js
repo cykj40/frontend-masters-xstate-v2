@@ -4,7 +4,7 @@ import { createMachine, assign, interpret, send } from 'xstate';
 import { raise } from 'xstate/lib/actions';
 import { formatTime } from '../utils/formatTime';
 
-import elements from '../utils/elements';
+import elements from '../utils/elements.js';
 
 function createFakeAudio(duration) {
   let currentTime = 0;
@@ -46,7 +46,7 @@ const invokeAudio = (ctx) => (sendBack, receive) => {
     sendBack({
       type: 'AUDIO.TIME',
       duration: parseInt(audio.duration),
-      currentTime: parseInt(audio.currentTime),
+      currentTime: Number(audio.currentTime),
     });
   });
 
@@ -224,38 +224,39 @@ const playerMachine = createMachine({
   },
 });
 
-const service = interpret(playerMachine).start();
-window.service = service;
+const interpretPlayerMachine = interpret(playerMachine);
+const service = interpretPlayerMachine.start();
 
-elements.elPlayButton.addEventListener('click', () => {
+
+elements.document.querySelector('#button-play').addEventListener('click', () => {
   service.send({ type: 'PLAY' });
 });
-elements.elPauseButton.addEventListener('click', () => {
+elements.document.querySelector('#button-pause').addEventListener('click', () => {
   service.send({ type: 'PAUSE' });
 });
-elements.elSkipButton.addEventListener('click', () => {
+elements.document.querySelector('#button-skip').addEventListener('click', () => {
   service.send({ type: 'SKIP' });
 });
-elements.elLikeButton.addEventListener('click', () => {
+elements.document.querySelector('#button-like').addEventListener('click', () => {
   service.send({ type: 'LIKE.TOGGLE' });
 });
-elements.elDislikeButton.addEventListener('click', () => {
+elements.document.querySelector('#button-dislike').addEventListener('click', () => {
   service.send({ type: 'DISLIKE' });
 });
-elements.elVolumeButton.addEventListener('click', () => {
+elements.document.querySelector('#button-volume').addEventListener('click', () => {
   service.send({ type: 'VOLUME.TOGGLE' });
 });
-elements.elScrubberInput.addEventListener('change', (e) => {
+elements.document.querySelector('#scrubber').addEventListener('change', (e) => {
   console.log(e.target.valueAsNumber);
 });
 service.subscribe((state) => {
   console.log(state.event, state.value, state.context);
   const { context } = state;
 
-  elements.elLoadingButton.hidden = !state.hasTag('loading');
-  elements.elPlayButton.hidden = !state.can({ type: 'PLAY' });
-  elements.elPauseButton.hidden = !state.can({ type: 'PAUSE' });
-  elements.elVolumeButton.dataset.level =
+  elements.document.querySelector('#button-loading').hidden = !state.hasTag('loading');
+  elements.document.querySelector('#button-play').hidden = !state.can({ type: 'PLAY' });
+  elements.document.querySelector('#button-pause').hidden = !state.can({ type: 'PAUSE' });
+  elements.document.querySelector('#button-volume').dataset.level =
     context.volume === 0
       ? 'zero'
       : context.volume <= 2
@@ -263,17 +264,17 @@ service.subscribe((state) => {
       : context.volume >= 8
       ? 'high'
       : undefined;
-  elements.elVolumeButton.dataset.status = state.matches({ volume: 'muted' })
+  elements.document.querySelector('#button-volume').dataset.status = state.matches({ volume: 'muted' })
     ? 'muted'
     : undefined;
 
-  elements.elScrubberInput.setAttribute('max', context.duration);
-  elements.elScrubberInput.value = context.elapsed;
-  elements.elElapsedOutput.innerHTML = formatTime(
+  elements.document.querySelector("#scrubber").setAttribute('max', context.duration);
+  elements.document.querySelector('#scrubber').value = context.elapsed;
+  elements.document.querySelector('#elapsed').innerHTML = formatTime(
     context.elapsed - context.duration
   );
 
-  elements.elLikeButton.dataset.likeStatus = context.likeStatus;
-  elements.elArtist.innerHTML = context.artist || '--';
-  elements.elTitle.innerHTML = context.title || '--';
+  elements.document.querySelector('#button-like').dataset.likeStatus = context.likeStatus;
+  elements.document.querySelector('.artist').innerHTML = context.artist || '--';
+  elements.document.querySelector('.title').innerHTML = context.title || '--';
 });

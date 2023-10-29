@@ -48,6 +48,9 @@ const playerMachine = createMachine({
               },
             },
             // Add a sibling history state here
+            history: {
+              type: 'history',
+            },
           },
           always: {
             cond: (ctx) => ctx.elapsed >= ctx.duration,

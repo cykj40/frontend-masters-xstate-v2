@@ -54,6 +54,9 @@ const playerMachine = createMachine({
           },
         },
         // Add a 'finished' final state here
+         finished: {
+          type: 'final',
+      },
       },
       onDone: {
         target: '.loading',
